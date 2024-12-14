@@ -24,40 +24,39 @@
 // @license      GNU GPL-3.0
 // @supportURL   https://github.com/ccr39/NicoNote
 // @homepage     https://github.com/ccr39/NicoNote
-// @require      https://unpkg.com/vditor/dist/index.min.js
+// @require       https://unpkg.com/vditor/dist/index.min.js
 // @require      https://unpkg.com/vditor@3.10.8/dist/js/i18n/zh_CN.js
 // @run-at       document-idle
+// @connect      *
 // ==/UserScript==
-
-GM_addStyle(`@import url('https://cdn.jsdelivr.net/npm/vditor/dist/index.css');`);
-//Vditor的CSS样式
-(function() {
+GM_addStyle(`@import url('https://unpkg.com/vditor/dist/index.css');`);
+(()=>{
     'use strict';
-//-------------------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------------------
     const nicoButton = document.createElement('div');
     const nicoIcon = document.createElement('img');
     nicoButton.id = "nicoBt";
     nicoIcon.id = "nicoIcon";
     nicoIcon.src = 'data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1MTIgNTEyIj4KIDxnPgogIDx0aXRsZT5MYXllciAxPC90aXRsZT4KICA8cmVjdCBpZD0ic3ZnXzUiIGhlaWdodD0iNTcxLjk5OTk4IiB3aWR0aD0iNTk2Ljk5OTk4IiB5PSItNDAuMzMzMzMiIHg9Ii02MS4wMDAwMSIgc3Ryb2tlPSIjMDAwIiBmaWxsPSIjMDA3ZmZmIi8+CiAgPGcgc3Ryb2tlPSJudWxsIiBpZD0ic3ZnXzEiPgogICA8cGF0aCBmaWxsPSIjZmZmZmZmIiBzdHJva2U9Im51bGwiIGQ9Im00MDUuNTc4MzgsMTFsLTI5NC41NTAzNCwwYy0xMy43MzIxNSwwIC0yNC45MDM4MiwxMS41OTE1NiAtMjQuOTAzODIsMjUuODM5ODRsMCwzNi4xOTU4OGwtMTQuODE3NzcsMGMtNy42NDA4NiwwIC0xMy44MzU0NSw2LjQyNzQyIC0xMy44MzU0NSwxNC4zNTU0N3M2LjE5NDU5LDE0LjM1NTQ3IDEzLjgzNTQ1LDE0LjM1NTQ3bDE0LjgxNzc3LDBsMCw1NS41OTI5OWwtMTQuODE3NzcsMGMtNy42NDA4NiwwIC0xMy44MzU0NSw2LjQyNzQyIC0xMy44MzU0NSwxNC4zNTU0N3M2LjE5NDU5LDE0LjM1NTQ3IDEzLjgzNTQ1LDE0LjM1NTQ3bDE0LjgxNzc3LDBsMCw1NS41OTM5NGwtMTQuODE3NzcsMGMtNy42NDA4NiwwIC0xMy44MzU0NSw2LjQyNzQyIC0xMy44MzU0NSwxNC4zNTU0N3M2LjE5NDU5LDE0LjM1NTQ3IDEzLjgzNTQ1LDE0LjM1NTQ3bDE0LjgxNzc3LDBsMCw1NS41OTM5NGwtMTQuODE3NzcsMGMtNy42NDA4NiwwIC0xMy44MzU0NSw2LjQyNzQyIC0xMy44MzU0NSwxNC4zNTU0N3M2LjE5NDU5LDE0LjM1NTQ3IDEzLjgzNTQ1LDE0LjM1NTQ3bDE0LjgxNzc3LDBsMCw1NS41OTI5OWwtMTQuODE3NzcsMGMtNy42NDA4NiwwIC0xMy44MzU0NSw2LjQyNzQyIC0xMy44MzU0NSwxNC4zNTU0N3M2LjE5NDU5LDE0LjM1NTQ3IDEzLjgzNTQ1LDE0LjM1NTQ3bDE0LjgxNzc3LDBsMCwzNi4xOTU4OGMwLDE0LjI0ODI4IDExLjE3MTY3LDI1LjgzOTg0IDI0LjkwMzgyLDI1LjgzOTg0bDI5NC41NTAzNCwwYzI0LjIzNDE4LDAgNDMuOTUwNjIsLTIwLjQ1NjU0IDQzLjk1MDYyLC00NS42MDI1NGwwLC0zOTguNzk0OTJjMCwtMjUuMTQ2IC0xOS43MTU1MiwtNDUuNjAyNTQgLTQzLjk1MDYyLC00NS42MDI1NHptMTYuMjc5NzIsNDQ0LjM5NzQ1YzAsOS4zMTM4MyAtNy4zMDIzNSwxNi44OTE2IC0xNi4yNzk3MiwxNi44OTE2bC0yOTEuNzgzMjUsMGwwLC0zMy4zMjQ3OGwxNC44MTc3NywwYzcuNjQwODYsMCAxMy44MzU0NSwtNi40Mjc0MiAxMy44MzU0NSwtMTQuMzU1NDdzLTYuMTk0NTksLTE0LjM1NTQ3IC0xMy44MzU0NSwtMTQuMzU1NDdsLTE0LjgxNzc3LDBsMCwtNTUuNTkyOTlsMTQuODE3NzcsMGM3LjY0MDg2LDAgMTMuODM1NDUsLTYuNDI3NDIgMTMuODM1NDUsLTE0LjM1NTQ3cy02LjE5NDU5LC0xNC4zNTU0NyAtMTMuODM1NDUsLTE0LjM1NTQ3bC0xNC44MTc3NywwbDAsLTU1LjU5Mzk0bDE0LjgxNzc3LDBjNy42NDA4NiwwIDEzLjgzNTQ1LC02LjQyNzQyIDEzLjgzNTQ1LC0xNC4zNTU0N3MtNi4xOTQ1OSwtMTQuMzU1NDcgLTEzLjgzNTQ1LC0xNC4zNTU0N2wtMTQuODE3NzcsMGwwLC01NS41OTM5NGwxNC44MTc3NywwYzcuNjQwODYsMCAxMy44MzU0NSwtNi40Mjc0MiAxMy44MzU0NSwtMTQuMzU1NDdzLTYuMTk0NTksLTE0LjM1NTQ3IC0xMy44MzU0NSwtMTQuMzU1NDdsLTE0LjgxNzc3LDBsMCwtNTUuNTkyOTlsMTQuODE3NzcsMGM3LjY0MDg2LDAgMTMuODM1NDUsLTYuNDI3NDIgMTMuODM1NDUsLTE0LjM1NTQ3cy02LjE5NDU5LC0xNC4zNTU0NyAtMTMuODM1NDUsLTE0LjM1NTQ3bC0xNC44MTc3NywwbDAsLTMzLjMyNDc4bDI5MS43ODMyNSwwYzguOTc2NDQsMCAxNi4yNzk3Miw3LjU3NjgyIDE2LjI3OTcyLDE2Ljg5MTZsMCwzOTguNzk0OTJ6IiBpZD0ic3ZnXzIiLz4KICAgPHBhdGggZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSJudWxsIiBkPSJtMzY2LjU0NzY0LDQxMC4yNTMzM2wtNjUuOTk4OCwwYy03LjY0MDg2LDAgLTEzLjgzNTQ1LDYuNDI3NDIgLTEzLjgzNTQ1LDE0LjM1NTQ3czYuMTk0NTksMTQuMzU1NDcgMTMuODM1NDUsMTQuMzU1NDdsNjUuOTk4OCwwYzcuNjQwODYsMCAxMy44MzU0NSwtNi40Mjc0MiAxMy44MzU0NSwtMTQuMzU1NDdzLTYuMTk0NTksLTE0LjM1NTQ3IC0xMy44MzU0NSwtMTQuMzU1NDd6IiBpZD0ic3ZnXzMiLz4KICAgPHBhdGggZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSJudWxsIiBkPSJtMzY2LjU0NzY0LDczLjAzNTcybC0xNjkuMTIwODksMGMtNy42NDA4NiwwIC0xMy44MzU0NSw2LjQyNzQyIC0xMy44MzU0NSwxNC4zNTU0N2wwLDc3Ljg5NDY5YzAsNy45MjgwNSA2LjE5NDU5LDE0LjM1NTQ3IDEzLjgzNTQ1LDE0LjM1NTQ3bDE2OS4xMjA4OSwwYzcuNjQwODYsMCAxMy44MzU0NSwtNi40Mjc0MiAxMy44MzU0NSwtMTQuMzU1NDdsMCwtNzcuODk0NjljMCwtNy45MjgwNSAtNi4xOTQ1OSwtMTQuMzU1NDcgLTEzLjgzNTQ1LC0xNC4zNTU0N3ptLTEzLjgzNTQ1LDc3Ljg5NDY5bC0xNDEuNDQ5OTgsMGwwLC00OS4xODM3NWwxNDEuNDQ5OTgsMGwwLDQ5LjE4Mzc1eiIgaWQ9InN2Z180Ii8+CiAgPC9nPgogPC9nPgoKPC9zdmc+';
-    var nicoButtonStyle ="position: fixed;"
-    +`left: ${window.innerWidth-80}px;`
-    +"top: 50px;"
-    +"width: 48px;"
-    +"height: 48px;"
-    +"border: 2px solid #D3D3D3;"
-    +"border-radius: 50%;"
-    +"background: rgb(0, 127, 255);"
-    +"z-index: 214748364700;"
-    +"text-align: center";
+    var nicoButtonStyle =`position: fixed;
+    left: ${window.innerWidth-80}px;
+    top: 50px;
+    width: 48px;
+    height: 48px;
+    border: 2px solid #D3D3D3;
+    border-radius: 50%;
+    background: rgb(0, 127, 255);
+    z-index: 214748364700;
+    text-align: center`;
     //用字符串写样式，给自己跪了。。。最后一个center后的;可写可不写
     //若在引号内换行，要在每行末加上\
-    var nicoIconStyle = "height: 71%;"
-    +"position: absolute;"
-    +"top: 50%;"
-    +"left: 50%;"
-    +"transform: translate(-50%, -50%);"
-    +":hover{filter: brightness(0.7); ";
+    var nicoIconStyle = `height: 71%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    :hover{filter: brightness(0.7);`;
     //第一句表示依照浏览器边框定位，left与bottom定义位置，width与height定义长宽，border用于定义边框，border-radius用于实现圆形效果,z-index定义了元素的图层高度，设置一个很大的数字可以保证其置于其他图像上方。
     nicoButton.setAttribute("style",nicoButtonStyle);
     nicoIcon.setAttribute("style",nicoIconStyle);
@@ -101,32 +100,64 @@ GM_addStyle(`@import url('https://cdn.jsdelivr.net/npm/vditor/dist/index.css');`
     var nicoNoteDiv = document.createElement("div");
     //这里用document.creatElement()创建元素。ps.比最开始进步了
     nicoNoteDiv.setAttribute("id","nicoNoteDiv");
-    var nicoDivStyle = "position: fixed;"
-    +"top: 60px;"
-    +"width: 360px;"
-    +"height: 200px;"
-    +"z-index: 214748364700;"
-    +"background: black;"
-    +"border: 1px solid #D3D3D3;"
-    +"resize: both;"
-    +"overflow: auto;";
+    var nicoDivStyle = `position: fixed;
+    top: 60px;
+    width: 360px;
+    height: 200px;
+    z-index: 214748364700;
+    background: black;
+    border: 1px solid #D3D3D3;
+    resize: both;
+    overflow: auto;
+    border-radius: 10px;
+    `;
+    //border-radius绘制圆角矩形
     nicoNoteDiv.setAttribute("style",nicoDivStyle);
     nicoNoteDiv.style.top = `${parseInt(nicoButton.style.top)}px`;
     nicoNoteDiv.style.left = `${parseInt(nicoButton.style.left)-parseInt(nicoNoteDiv.style.width)}px`;
     nicoNoteDiv.style.display = "none";
     document.querySelector("html").appendChild(nicoNoteDiv);
- //---------------------------------------下方要编辑一个嵌套进去的div-------------------------------
-    const innerNotebook = document.createElement("div");
-    innerNotebook.setAttribute("id","innerNotebook");
-    innerNotebook.style.height = "25px";
-    innerNotebook.style.width = "100%";
-    innerNotebook.style.background = "white";
-    innerNotebook.style.top = "0px";
-    innerNotebook.style.cursor = "move";
-    nicoNoteDiv.appendChild(innerNotebook);
-    letWeDrag(nicoNoteDiv,false);
+
+//---------------------------------------限制大小---------------------------
+    document.addEventListener("mouseup",()=>{
+        if(parseInt(nicoNoteDiv.style.width)<200){ nicoNoteDiv.style.width="200px";};
+        if(parseInt(nicoNoteDiv.style.height)<40){ nicoNoteDiv.style.height="40px";}
+    });
+//------------------------------改变窗口大小调节位置----------------------------------------
+    window.top.addEventListener('resize', () => {
+        const elementWidth = nicoButton.offsetWidth;
+        const viewportWidth = window.innerWidth;
+        nicoButton.style.left = (viewportWidth - elementWidth-10) + "px";
+        nicoNoteDiv.style.top = `${parseInt(nicoButton.style.top)}px`;
+        nicoNoteDiv.style.left = `${parseInt(nicoButton.style.left)-parseInt(nicoNoteDiv.style.width)}px`;
+    });
+//————————————————引入 Vditor—————————————————————————————
+    const nicoVditor = document.createElement("div");
+    nicoVditor.id = "nicoVditor";
+    nicoVditor.style = `
+    position: absolute;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    background: #D3D3D3;
+    `;
+    //用``来写，又进步了。这里在absolute下定义top和bottom后不定义height，就可以让其填满。
+    nicoNoteDiv.appendChild(nicoVditor);
+    const vditor = new Vditor("nicoVditor",{
+        width: "100%",
+        placeholder: 'NicoNote🤗',
+        toolbar: ['emoji','table','edit-mode'],
+        cache: {
+            enable: false,
+        },
+        after: () =>{
+            const nicoToolbar=document.querySelector("#nicoVditor > div.vditor-toolbar");
+            nicoToolbar.style.cursor = "move";
+        letWeDrag(nicoNoteDiv,false,nicoToolbar);
+        }
+    });
 //---------------------------------------底下是一个可以让元素可以被拖动的函数---------------------------
-    function letWeDrag(dragDiv,ifBt){
+    function letWeDrag(dragDiv,ifBt,nicoToolbar){
         let offsetX = 0;
         let offsetY = 0;
         let nicoDivX =0;
@@ -134,17 +165,17 @@ GM_addStyle(`@import url('https://cdn.jsdelivr.net/npm/vditor/dist/index.css');`
         let ifDragging = false;
         //充当一个布尔变量，用于判断是否在抓取移动状态,let为局部变量
         if(ifBt){dragDiv.addEventListener("mousedown",(e) => {//"mousedown"即监测鼠标点下的事件。
-                ifDragging = true;
-                offsetX = e.clientX;
-                offsetY = e.clientY;
-                //记录初始鼠标坐标(相对于左上角)
-                nicoDivY = parseInt(dragDiv.style.top);
-                nicoDivX = parseInt(dragDiv.style.left);
-                //获取div的位置parseInt（）会将字符串转化为数字（忽略最后的非数字部分）
-                e.preventDefault();
-                //用来禁止鼠标拖拽时选中的功能
-            })}
-        else{innerNotebook.addEventListener("mousedown",(e) => {//通过监听内部div调整外部div
+            ifDragging = true;
+            offsetX = e.clientX;
+            offsetY = e.clientY;
+            //记录初始鼠标坐标(相对于左上角)
+            nicoDivY = parseInt(dragDiv.style.top);
+            nicoDivX = parseInt(dragDiv.style.left);
+            //获取div的位置parseInt（）会将字符串转化为数字（忽略最后的非数字部分）
+            e.preventDefault();
+            //用来禁止鼠标拖拽时选中的功能
+        })}
+        else{nicoToolbar.addEventListener("mousedown",(e) => {//通过监听内部div调整外部div
             ifDragging = true;
             offsetX = e.clientX;
             offsetY = e.clientY;
@@ -169,41 +200,7 @@ GM_addStyle(`@import url('https://cdn.jsdelivr.net/npm/vditor/dist/index.css');`
         });
         //松开鼠标，停止拖拽
     }
-//---------------------------------------限制大小---------------------------
-    document.addEventListener("mouseup",()=>{
-        if(parseInt(nicoNoteDiv.style.width)<200){ nicoNoteDiv.style.width="200px";};
-        if(parseInt(nicoNoteDiv.style.height)<40){ nicoNoteDiv.style.height="40px";}
-    });
-//------------------------------改变窗口大小调节位置----------------------------------------
-    window.top.addEventListener('resize', () => {
-        const elementWidth = nicoButton.offsetWidth;
-        const viewportWidth = window.innerWidth;
-        nicoButton.style.left = (viewportWidth - elementWidth-10) + "px";
-        nicoNoteDiv.style.top = `${parseInt(nicoButton.style.top)}px`;
-        nicoNoteDiv.style.left = `${parseInt(nicoButton.style.left)-parseInt(nicoNoteDiv.style.width)}px`;
-    });
-//————————————————引入 Vditor—————————————————————————————
-    const nicoVditor = document.createElement("div");
-    nicoVditor.id = "nicoVditor";
-    nicoVditor.style = `
-    position: absolute;
-    width: 100%;
-    top: 25px;
-    bottom: 0;
-    background: pink;
-    `;
-    //用``来写，又进步了。这里在absolute下定义top和bottom后不定义height，就可以让其填满。
-    nicoNoteDiv.appendChild(nicoVditor);
-    const vditor = new Vditor("nicoVditor",{
-        height: 300,
-        width: 500,
-        placeholder: '看到这个说明初始化成功了',
-        toolbar: ['emoji', 'headings', 'bold', 'italic', 'strike', 'link', 'list'],
-        cache: {
-            enable: false,
-        },
-    })
-    //为了由于初始化时要保证nicoVditor已经存在，因此我们应该设置在第一次点击之后才初始化。
+
 
 
 })();
