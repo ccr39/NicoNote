@@ -6,7 +6,7 @@
 // @namespace    https://github.com/ccr39/NicoNote
 // @supportURL   https://greasyfork.org/zh-CN/scripts/521195-%E6%B5%8F%E8%A7%88%E5%99%A8%E7%AC%94%E8%AE%B0%E6%9C%AC-niconote
 // @supportURL   https://github.com/ccr39/NicoNote
-// @version      1.1.0
+// @version      1.1.1
 // @description        一个可以应用于浏览器的笔记本脚本。轻量，方便，支持 Markdown 语法。高效的浏览器学习工具。
 // @description:zh-CN  一个可以应用于浏览器的笔记本脚本。轻量，方便，支持 Markdown 语法。高效的浏览器学习工具。
 // @description:zh-TW  一個可以應用於瀏覽器的筆記本腳本。輕量，方便，支持 Markdown 語法。高效的瀏覽器學習工具。
@@ -291,6 +291,7 @@ GM_addStyle(`@import url('https://unpkg.com/vditor/dist/index.css');`);
                 enable: false,
             },
             after: () =>{
+                vditor.setValue('');
                 const nicoToolbar=document.querySelector("#nicoVditor > div.vditor-toolbar");
                 nicoToolbar.style.cursor = "move";
                 letWeDrag(nicoNoteDiv,false,nicoToolbar);
