@@ -4,7 +4,7 @@
 // @name:zh-TW   瀏覽器筆記本-NicoNote
 // @name:en      Notebook in browser-NicoNote
 // @namespace    https://github.com/ccr39/NicoNote
-// @version      beta0.1
+// @version      0.1.0
 // @description        一个可以应用于浏览器的笔记本脚本。轻量，方便，支持 Markdown 语法。高效的浏览器学习工具。
 // @description:zh-CN  一个可以应用于浏览器的笔记本脚本。轻量，方便，支持 Markdown 语法。高效的浏览器学习工具。
 // @description:zh-TW  一個可以應用於瀏覽器的筆記本腳本。輕量，方便，支持 Markdown 語法。高效的瀏覽器學習工具。
@@ -24,7 +24,7 @@
 // @license      GNU GPL-3.0
 // @supportURL   https://github.com/ccr39/NicoNote
 // @homepage     https://github.com/ccr39/NicoNote
-// @require       https://unpkg.com/vditor/dist/index.min.js
+// @require      https://unpkg.com/vditor/dist/index.min.js
 // @require      https://unpkg.com/vditor@3.10.8/dist/js/i18n/zh_CN.js
 // @run-at       document-idle
 // @connect      *
@@ -32,7 +32,6 @@
 GM_addStyle(`@import url('https://unpkg.com/vditor/dist/index.css');`);
 (()=>{
     'use strict';
-
 //-------------------------------------------------------------------------------------
     const nicoButton = document.createElement('div');
     const nicoIcon = document.createElement('img');
@@ -110,8 +109,10 @@ GM_addStyle(`@import url('https://unpkg.com/vditor/dist/index.css');`);
     resize: both;
     overflow: auto;
     border-radius: 10px;
+    box-shadow: 3px 3px 5px #D3D3D3;
     `;
     //border-radius绘制圆角矩形
+    //box-shadow添加阴影后面的值为水平偏移量、垂直偏移量、模糊半径和阴影颜色。
     nicoNoteDiv.setAttribute("style",nicoDivStyle);
     nicoNoteDiv.style.top = `${parseInt(nicoButton.style.top)}px`;
     nicoNoteDiv.style.left = `${parseInt(nicoButton.style.left)-parseInt(nicoNoteDiv.style.width)}px`;
@@ -120,8 +121,8 @@ GM_addStyle(`@import url('https://unpkg.com/vditor/dist/index.css');`);
 
 //---------------------------------------限制大小---------------------------
     document.addEventListener("mouseup",()=>{
-        if(parseInt(nicoNoteDiv.style.width)<200){ nicoNoteDiv.style.width="200px";};
-        if(parseInt(nicoNoteDiv.style.height)<40){ nicoNoteDiv.style.height="40px";}
+        if(parseInt(nicoNoteDiv.style.width)<200){ nicoNoteDiv.style.width="300px";};
+        if(parseInt(nicoNoteDiv.style.height)<40){ nicoNoteDiv.style.height="200px";}
     });
 //------------------------------改变窗口大小调节位置----------------------------------------
     window.top.addEventListener('resize', () => {
@@ -131,8 +132,48 @@ GM_addStyle(`@import url('https://unpkg.com/vditor/dist/index.css');`);
         nicoNoteDiv.style.top = `${parseInt(nicoButton.style.top)}px`;
         nicoNoteDiv.style.left = `${parseInt(nicoButton.style.left)-parseInt(nicoNoteDiv.style.width)}px`;
     });
+//————————————————————加载数据库———————————————————
+    var dbVersion = Date.now();
+    const request = indexedDB.open("VditorHistoryDB",dbVersion);
+    let db;
+    request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        //表示成功打开的数据库实例。
+        if (!db.objectStoreNames.contains("history")) {
+            db.createObjectStore("history", { keyPath: "id" });
+            //如果没有创建对象储存，则创建一个"history"对象储存。
+            //而每一条主字段的标识为id，也就是我们可以在之后给每个字段添加id，作为标识。IndexedDB 会根据这个属性对记录进行索引。
+        }
+    };
+    function saveContent() {
+        const content = document.querySelector("#nicoVditor > div.vditor-content > div.vditor-ir").innerHTML;//获取 HTML 内容
+        const timestamp = Date.now(); // 时间戳作为 ID
+        const transaction = db.transaction("history", "readwrite");//创建一个操作 "history" 存储的读写事务。
+        const store = transaction.objectStore("history");// 获取 "history" 对象存储
+        store.put({ id: timestamp, content: content, savedAt: new Date().toLocaleString() });
+        //向"history" 存储中放入一个id为时间戳，内容为 Markdown 内容，保存的时间为当前时间的内容。
+        //savedAt 是一个字段，用于记录保存的时间。而new Date().toLocaleString() 是 JavaScript 的方法，返回当前时间的本地化格式（例如 2024/12/15 10:30:45）
+        transaction.oncomplete = () => {
+            alert("内容已保存！");
+        };
+        transaction.onerror = (event) => {
+            console.error("保存失败", event.target.error);
+        };
+    }
+    function showHistory(ifFirst,callback) {
+        const transaction = db.transaction("history", "readonly");//创建读取事务的实例
+        const store = transaction.objectStore("history");//获取对象储存的实例
+        const request = store.getAll();
+        request.onsuccess = (event) => {
+            const history = event.target.result; // 确保在请求成功后访问 result 属性
+            history.sort((a, b) => b.id - a.id);// 按 ID（即时间戳）降序排序
+            if(ifFirst){document.querySelector("#nicoVditor > div.vditor-content > div.vditor-ir").innerHTML = history[0].content;ifFirst=true;}
+            else{return callback(history);}
+            };
+    }
+
 //————————————————引入 Vditor—————————————————————————————
-    const nicoVditor = document.createElement("div");
+    var nicoVditor = document.createElement("div");
     nicoVditor.id = "nicoVditor";
     nicoVditor.style = `
     position: absolute;
@@ -143,19 +184,55 @@ GM_addStyle(`@import url('https://unpkg.com/vditor/dist/index.css');`);
     `;
     //用``来写，又进步了。这里在absolute下定义top和bottom后不定义height，就可以让其填满。
     nicoNoteDiv.appendChild(nicoVditor);
-    const vditor = new Vditor("nicoVditor",{
-        width: "100%",
-        placeholder: 'NicoNote🤗',
-        toolbar: ['emoji','table','edit-mode'],
-        cache: {
-            enable: false,
-        },
-        after: () =>{
-            const nicoToolbar=document.querySelector("#nicoVditor > div.vditor-toolbar");
-            nicoToolbar.style.cursor = "move";
-        letWeDrag(nicoNoteDiv,false,nicoToolbar);
-        }
-    });
+    request.onsuccess = e => {
+        const vditor = new Vditor("nicoVditor",{
+            width: "100%",
+            placeholder: 'NicoNote🤗',
+            toolbar: ['emoji','preview','outline','export','upload','help',{
+                name: 'nicoSave',
+                tipPosition: 's',
+                tip: '保存到浏览器',
+                className: 'right',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"> <path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>`,
+                click () {saveContent()},}, {
+                name: 'hsitory',
+                tipPosition: 's',
+                tip: '历史记录',
+                className: 'right',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 24 24" fill="none">
+<path d="M12 8V12L14.5 14.5" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.60423 5.60423L5.0739 5.0739V5.0739L5.60423 5.60423ZM4.33785 6.87061L3.58786 6.87438C3.58992 7.28564 3.92281 7.61853 4.33408 7.6206L4.33785 6.87061ZM6.87963 7.63339C7.29384 7.63547 7.63131 7.30138 7.63339 6.88717C7.63547 6.47296 7.30138 6.13549 6.88717 6.13341L6.87963 7.63339ZM5.07505 4.32129C5.07296 3.90708 4.7355 3.57298 4.32129 3.57506C3.90708 3.57715 3.57298 3.91462 3.57507 4.32882L5.07505 4.32129ZM3.75 12C3.75 11.5858 3.41421 11.25 3 11.25C2.58579 11.25 2.25 11.5858 2.25 12H3.75ZM16.8755 20.4452C17.2341 20.2378 17.3566 19.779 17.1492 19.4204C16.9418 19.0619 16.483 18.9393 16.1245 19.1468L16.8755 20.4452ZM19.1468 16.1245C18.9393 16.483 19.0619 16.9418 19.4204 17.1492C19.779 17.3566 20.2378 17.2341 20.4452 16.8755L19.1468 16.1245ZM5.14033 5.07126C4.84598 5.36269 4.84361 5.83756 5.13505 6.13191C5.42648 6.42626 5.90134 6.42862 6.19569 6.13719L5.14033 5.07126ZM18.8623 5.13786C15.0421 1.31766 8.86882 1.27898 5.0739 5.0739L6.13456 6.13456C9.33366 2.93545 14.5572 2.95404 17.8017 6.19852L18.8623 5.13786ZM5.0739 5.0739L3.80752 6.34028L4.86818 7.40094L6.13456 6.13456L5.0739 5.0739ZM4.33408 7.6206L6.87963 7.63339L6.88717 6.13341L4.34162 6.12062L4.33408 7.6206ZM5.08784 6.86684L5.07505 4.32129L3.57507 4.32882L3.58786 6.87438L5.08784 6.86684ZM12 3.75C16.5563 3.75 20.25 7.44365 20.25 12H21.75C21.75 6.61522 17.3848 2.25 12 2.25V3.75ZM12 20.25C7.44365 20.25 3.75 16.5563 3.75 12H2.25C2.25 17.3848 6.61522 21.75 12 21.75V20.25ZM16.1245 19.1468C14.9118 19.8483 13.5039 20.25 12 20.25V21.75C13.7747 21.75 15.4407 21.2752 16.8755 20.4452L16.1245 19.1468ZM20.25 12C20.25 13.5039 19.8483 14.9118 19.1468 16.1245L20.4452 16.8755C21.2752 15.4407 21.75 13.7747 21.75 12H20.25ZM6.19569 6.13719C7.68707 4.66059 9.73646 3.75 12 3.75V2.25C9.32542 2.25 6.90113 3.32791 5.14033 5.07126L6.19569 6.13719Z" fill="#1C274C"/>
+</svg>`,
+                click: function (event, vditor) {
+                    showHistoryDialog(event, vditor);
+                }},{
+                name: 'sponsor',
+                tipPosition: 's',
+                tip: '成为赞助者',
+                className: 'right',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" role="img" width="48px" height="48px" viewBox="0 0 24 24" aria-labelledby="favouriteIconTitle" stroke="red" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none" color="red"> <title id="favouriteIconTitle">Favourite</title> <path d="M12,21 L10.55,19.7051771 C5.4,15.1242507 2,12.1029973 2,8.39509537 C2,5.37384196 4.42,3 7.5,3 C9.24,3 10.91,3.79455041 12,5.05013624 C13.09,3.79455041 14.76,3 16.5,3 C19.58,3 22,5.37384196 22,8.39509537 C22,12.1029973 18.6,15.1242507 13.45,19.7149864 L12,21 Z"/> </svg>`,
+                click () {window.open("https://ccr39.github.io/donate/", "_blank");},//打开一个新的标签页
+            },{
+                name: 'hide',
+                tipPosition: 's',
+                tip: '隐藏',
+                className: 'left',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 1024 1024"><path d="M876.8 156.8c0-9.6-3.2-16-9.6-22.4-6.4-6.4-12.8-9.6-22.4-9.6-9.6 0-16 3.2-22.4 9.6L736 220.8c-64-32-137.6-51.2-224-60.8-160 16-288 73.6-377.6 176C44.8 438.4 0 496 0 512s48 73.6 134.4 176c22.4 25.6 44.8 48 73.6 67.2l-86.4 89.6c-6.4 6.4-9.6 12.8-9.6 22.4 0 9.6 3.2 16 9.6 22.4 6.4 6.4 12.8 9.6 22.4 9.6 9.6 0 16-3.2 22.4-9.6l704-710.4c3.2-6.4 6.4-12.8 6.4-22.4Zm-646.4 528c-76.8-70.4-128-128-153.6-172.8 28.8-48 80-105.6 153.6-172.8C304 272 400 230.4 512 224c64 3.2 124.8 19.2 176 44.8l-54.4 54.4C598.4 300.8 560 288 512 288c-64 0-115.2 22.4-160 64s-64 96-64 160c0 48 12.8 89.6 35.2 124.8L256 707.2c-9.6-6.4-19.2-16-25.6-22.4Zm140.8-96c-12.8-22.4-19.2-48-19.2-76.8 0-44.8 16-83.2 48-112 32-28.8 67.2-48 112-48 28.8 0 54.4 6.4 73.6 19.2L371.2 588.8ZM889.599 336c-12.8-16-28.8-28.8-41.6-41.6l-48 48c73.6 67.2 124.8 124.8 150.4 169.6-28.8 48-80 105.6-153.6 172.8-73.6 67.2-172.8 108.8-284.8 115.2-51.2-3.2-99.2-12.8-140.8-28.8l-48 48c57.6 22.4 118.4 38.4 188.8 44.8 160-16 288-73.6 377.6-176C979.199 585.6 1024 528 1024 512s-48.001-73.6-134.401-176Z" fill="#000000"/><path d="M511.998 672c-12.8 0-25.6-3.2-38.4-6.4l-51.2 51.2c28.8 12.8 57.6 19.2 89.6 19.2 64 0 115.2-22.4 160-64 41.6-41.6 64-96 64-160 0-32-6.4-64-19.2-89.6l-51.2 51.2c3.2 12.8 6.4 25.6 6.4 38.4 0 44.8-16 83.2-48 112-32 28.8-67.2 48-112 48Z" fill="#000000"/></svg>`,
+                click () {nicoNoteDiv.style.display = "none";
+                          nicoButton.style.opacity="1";
+                          ifNicoNotDiv = true;},
+            },],
+            cache: {
+                enable: false,
+            },
+            after: () =>{
+                const nicoToolbar=document.querySelector("#nicoVditor > div.vditor-toolbar");
+                nicoToolbar.style.cursor = "move";
+                letWeDrag(nicoNoteDiv,false,nicoToolbar);
+                showHistory(true);
+            }
+        });
+    };
 //---------------------------------------底下是一个可以让元素可以被拖动的函数---------------------------
     function letWeDrag(dragDiv,ifBt,nicoToolbar){
         let offsetX = 0;
@@ -200,7 +277,64 @@ GM_addStyle(`@import url('https://unpkg.com/vditor/dist/index.css');`);
         });
         //松开鼠标，停止拖拽
     }
+//----------------历史记录弹窗------------------------
+    function showHistoryDialog(event, vditor) {
+        // 如果已有弹窗，先移除
+        (async () => {
+            showHistory(false, (history) => {
+                console.log("历史记录:", history);
+                const existingDialog = document.querySelector("#history-dialog");
+                if (existingDialog) existingDialog.remove();
+                // 创建弹窗容器
+                const dialog = document.createElement("div");
+                dialog.id = "history-dialog";
+                dialog.style.position = "fixed";
+                dialog.style.top = "50%";
+                dialog.style.left = "50%";
+                dialog.style.transform = "translate(-50%, -50%)";
+                dialog.style.background = "#fff";
+                dialog.style.border = "1px solid #ddd";
+                dialog.style.padding = "15px";
+                dialog.style.boxShadow = "0px 2px 10px rgba(0, 0, 0, 0.3)";
+                dialog.style.zIndex = "214748364800";
+                dialog.style.maxHeight = "300px";
+                dialog.style.overflowY = "auto";
 
+                // 弹窗标题
+                const title = document.createElement("h3");
+                title.innerText = "历史记录";
+                title.style.marginTop = "0";
+                dialog.appendChild(title);
 
+                // 遍历历史记录，添加按钮
+                history.forEach((item, index) => {
+                    const button = document.createElement("button");
+                    button.innerText = `${index + 1}. ${item.savedAt}`;
+                    button.style.display = "block";
+                    button.style.marginBottom = "10px";
+                    button.style.width = "100%";
+
+                    // 点击按钮时写入内容
+                    button.onclick = () => {
+                        document.querySelector("#nicoVditor > div.vditor-content > div.vditor-ir").innerHTML = item.content;
+                        console.log(`已恢复历史记录: ${item.savedAt}`);
+                        dialog.remove(); // 关闭弹窗
+                    };
+
+                    dialog.appendChild(button);
+                });
+
+                // 关闭按钮
+                const closeButton = document.createElement("button");
+                closeButton.innerText = "关闭";
+                closeButton.style.marginTop = "10px";
+                closeButton.style.width = "100%";
+                closeButton.onclick = () => dialog.remove();
+                dialog.appendChild(closeButton);
+                document.body.appendChild(dialog);
+                // 将弹窗插入到页面
+            });
+        })();
+    }
 
 })();
