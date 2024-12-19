@@ -17,7 +17,7 @@
 
 在浏览器中安装 Tampermonkey 插件：[首页 | Tampermonkey](https://www.tampermonkey.net/)。
 
-在此点击[安装脚本](https://fastly.jsdelivr.net/gh/ccr39/NicoNote@main/js/浏览器笔记本-NicoNote-beta0.1.user.js)进行安装。
+在此点击[安装脚本](https://update.greasyfork.org/scripts/521195/浏览器笔记本-NicoNote.user.js)进行安装。
 
 ### 功能介绍
 
@@ -35,7 +35,7 @@
 
 1. 某些网站的 CSP（内容安全策略）会禁止外部向其注入脚本，因此 Vditor 将不能在这些网站（如：Github、openAI）加载。
 
-   **解决方法：**安装外部[浏览器插件](https://github.com/lisonge/Disable-CSP)来禁用 CSP ，启动插件`Disable HTTP CSP`后若没有生效，请尝试重启浏览器。但为了防止一些攻击行为，请不要长期禁用 CSP。
+   **解决方法**：安装外部[浏览器插件](https://github.com/lisonge/Disable-CSP)来禁用 CSP ，启动插件`Disable HTTP CSP`后若没有生效，请尝试重启浏览器。但为了防止一些攻击行为，请不要长期禁用 CSP。
 
 2. 处第一条所述原因外，仍有未知原因可能会导致 Vditor 在某些网页（如 Bing 搜索页）无法加载，目前已将Bing 搜索页添加到黑名单，如果您知道原因或发现某些新的网页，请及时提交议题。
 
